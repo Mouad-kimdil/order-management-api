@@ -18,3 +18,7 @@ Thumbs.db
 
 ### Logs ###
 *.log
+
+### Personal ###
+file.md
+.junie/

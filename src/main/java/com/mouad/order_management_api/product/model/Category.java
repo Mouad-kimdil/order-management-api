@@ -2,6 +2,7 @@ package com.mouad.order_management_api.product.model;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
