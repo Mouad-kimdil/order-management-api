@@ -1,7 +1,9 @@
 package com.mouad.order_management_api.product.controller;
 
+import com.mouad.order_management_api.product.dto.CreateOrderRequest;
 import com.mouad.order_management_api.product.dto.OrderResponse;
 import com.mouad.order_management_api.product.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +32,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponse> create() {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create());
+    public ResponseEntity<OrderResponse> create(@RequestBody @Valid CreateOrderRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
     }
 }
