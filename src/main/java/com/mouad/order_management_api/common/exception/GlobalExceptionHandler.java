@@ -2,6 +2,7 @@ package com.mouad.order_management_api.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -95,6 +96,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ApiErrorResponse> handleInsufficientStock(
+            InsufficientStockException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiErrorResponse> handleTypeMismatch(
         MethodArgumentTypeMismatchException ex,
@@ -169,6 +178,13 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "Resource not found", request);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiErrorResponse> handleOptimisticLockingFailure(
+            OptimisticLockingFailureException ex,
+            HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.CONFLICT, "Resource was modified concurrently. Please refresh and retry.", request);
     }
 
     @ExceptionHandler(Exception.class)

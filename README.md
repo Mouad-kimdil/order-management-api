@@ -20,6 +20,10 @@ user-owned orders, secured with JWT authentication and role-based + owner-scoped
 - Role-based authorization: admin-only product/category writes (`@PreAuthorize`)
 - Owner-scoped orders: users only see their own orders; non-owner and missing reads return a
   uniform `403` (no existence leak); admins see everything and get a truthful `404`
+- Order line items using a snapshot pattern (`sku`, `name`, `unitPrice` copied from the product
+  at order time, so later product edits don't rewrite order history)
+- Stock-safe order creation: insufficient stock → `409`; a `@Version` optimistic-lock column on
+  `product` catches concurrent orders on the same product (lost race → `409`)
 - Uniform error responses via `@RestControllerAdvice` (401 for missing/invalid tokens, 404 for
   unknown routes, etc.)
 
@@ -102,6 +106,11 @@ JWT settings (in `application.properties`): `app.jwt.secret`, `app.jwt.expiratio
 | POST | `/api/v1/orders` | Create an order (owned by the caller) | Authenticated |
 | GET | `/api/v1/orders` | List own orders (admins: all orders) | Authenticated |
 | GET | `/api/v1/orders/{id}` | Get own order (admins: any) | Authenticated |
+
+Creating an order snapshots each item's `sku`, `name`, and `unitPrice` from the product,
+decrements stock in the same transaction, and rejects requests that exceed available stock with
+`409`. Concurrent updates to the same product are caught by the `@Version` optimistic-lock column
+(also surfaced as `409`).
 
 ## Security Model
 

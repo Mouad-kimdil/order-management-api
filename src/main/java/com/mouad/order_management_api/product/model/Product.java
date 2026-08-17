@@ -39,6 +39,9 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductStatus status;
 
+    @Version
+    private long version;
+
     public Product(String sku, String name, String description, BigDecimal price, Integer quantityInStock,
             Category category, ProductStatus status) {
         this.sku = sku;
