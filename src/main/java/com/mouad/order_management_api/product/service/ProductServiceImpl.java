@@ -116,17 +116,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponse getBySku(String sku) {
-        Product product = productRepository.findProductBySku(sku);
-        if (product == null) {
-            throw new ProductNotFoundException("Product with sku " + sku + " was not found");
-        }
+        Product product = productRepository.findProductBySku(sku)
+                .orElseThrow(() -> new ProductNotFoundException("Product with sku " + sku + " was not found"));
         return toResponse(product);
     }
 
     @Transactional(readOnly = true)
     public ProductResponse getById(UUID id) {
         Product product = findProductByIdOrElseThrow(id);
-
         return toResponse(product);
     }
 

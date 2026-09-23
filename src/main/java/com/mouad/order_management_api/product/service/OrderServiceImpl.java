@@ -20,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -75,23 +72,36 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse create(CreateOrderRequest request) {
         Order order = new Order(currentUser(), OrderStatus.PENDING, LocalDateTime.now());
 
-        for (CreateOrderItemRequest item : request.items()) {
-            Product product = productRepository.findById(item.productId())
-                    .orElseThrow(() -> new ProductNotFoundException(item.productId()));
+        Map<UUID, Integer> merge = new HashMap<>();
 
-            if (product.getQuantityInStock() < item.quantity()) {
-                throw new InsufficientStockException(product.getId(), item.quantity());
+        for (CreateOrderItemRequest item : request.items()) {
+            if (merge.containsKey(item.productId())) {
+                int quantity = merge.get(item.productId());
+                quantity += item.quantity();
+                merge.put(item.productId(), quantity);
+            }
+            else {
+                merge.put(item.productId(), item.quantity());
+            }
+        }
+
+        merge.forEach((productId, quantity) -> {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new ProductNotFoundException(productId));
+
+            if (product.getQuantityInStock() < quantity) {
+                throw new InsufficientStockException(product.getId(), quantity);
             }
 
-            product.setQuantityInStock(product.getQuantityInStock() - item.quantity());
+            product.setQuantityInStock(product.getQuantityInStock() - quantity);
 
             OrderItem orderItem = new OrderItem(
                     order, product, product.getSku(),
                     product.getName(), product.getPrice(),
-                    item.quantity()
+                    quantity
             );
             order.getItems().add(orderItem);
-        }
+        });
         orderRepository.save(order);
         return toResponse(order);
     }
@@ -151,6 +161,4 @@ public class OrderServiceImpl implements OrderService {
                 .map(this::toResponse)
                 .orElseThrow(() -> new AccessDeniedException("Access denied"));
     }
-
-
-    }
+}

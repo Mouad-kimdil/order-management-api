@@ -1,6 +1,7 @@
 package com.mouad.order_management_api.product.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.mouad.order_management_api.product.dto.ProductSummary;
@@ -17,7 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     boolean existsBySkuAndIdNot(String sku, UUID id);
     boolean existsByNameAndIdNot(String name, UUID id);
 
-    Product findProductBySku(String sku);
+    Optional<Product> findProductBySku(String sku);
 
     @Query(
             value = "SELECT p FROM Product p JOIN FETCH p.category",
