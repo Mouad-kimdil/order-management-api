@@ -37,18 +37,37 @@ user-owned orders, secured with JWT authentication and role-based + owner-scoped
 
 ### Configuration
 
-Set the database password via environment variable:
+Secrets are never committed. The app reads them from a git-ignored `.env` file
+(loaded via `spring.config.import=optional:file:.env[.properties]` in
+`application.properties`).
 
-```shell
-export DB_PASSWORD=your_password
-```
+1. Copy the template:
+  ```shell
+  cp .env.example .env
+  ```
+2. Edit `.env` and set real values:
+  - `DB_URL` (default `jdbc:postgresql://localhost:5432/product_db`)
+  - `DB_USERNAME`
+  - `DB_PASSWORD`
+  - `JWT_SECRET` — generate a fresh one, do not reuse old values:
+    ```shell
+    openssl rand -base64 64
+    ```
+3. Run with `./mvnw spring-boot:run`. Environment variables with the same names
+   (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`) also work without a
+   `.env` file.
 
-Default connection settings (overridable in `application.properties`):
+Default connection settings (overridable via `.env` or environment):
 - URL: `jdbc:postgresql://localhost:5432/product_db`
 - Username: `product_user`
 
-JWT settings (in `application.properties`): `app.jwt.secret`, `app.jwt.expiration-ms`
-(access token TTL), `app.jwt.refresh-expiration-ms` (refresh token TTL).
+JWT settings: `app.jwt.secret` is injected from `JWT_SECRET` (no default);
+`app.jwt.expiration-ms` (access token TTL) and
+`app.jwt.refresh-expiration-ms` (refresh token TTL) stay as normal properties.
+
+Tests use `application-test.properties` (H2 in-memory) and Testcontainers
+(PostgreSQL image, no real secrets needed), so no `.env` is required for
+`./mvnw test`.
 
 ### Run
 

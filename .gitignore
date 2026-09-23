@@ -25,3 +25,10 @@ file.md
 
 # Planning/tracking notes (not part of the build)
 ROADMAP.md
+project-context.md
+
+### Secrets / local config ###
+.env
+.env.*
+!.env.example
+application-prod.properties
